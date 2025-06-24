@@ -34,7 +34,7 @@ if uploaded_file is not None:
 
 # UI: Ask user for S3 key
 st.title("View PDF from S3")
-pdf_key = st.text_input("Enter S3 key of the PDF (e.g., `invoices/INV001.pdf`):")
+'''pdf_key = st.text_input("Enter S3 key of the PDF (e.g., `invoices/INV001.pdf`):")'''
 
 
 s3 = boto3.client(
@@ -44,7 +44,20 @@ s3 = boto3.client(
       region_name=region
     )
 
+response = s3.list_objects_v2(Bucket=bucket)
+
+if "Contents" in response:
+    for obj in response["Contents"]:
+        if obj["Key"].endswith(".pdf"):
+            pdf_key = obj["Key"]
+            break
+
+st.title("View Frist PDF")
+
+
 if pdf_key:
+    st.write(f"Loading PDF: `{pdf_key}`")
+
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
             s3.download_fileobj(bucket, pdf_key, tmp_file)
