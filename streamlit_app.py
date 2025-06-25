@@ -7,6 +7,8 @@ import boto3
 import os
 from botocore.exceptions import NoCredentialsError
 import tempfile
+import fitz
+import re
 
 
 aws_access_key_id = st.secrets["AWS_ACCESS_KEY"]
@@ -62,15 +64,33 @@ if pdf_key:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
             s3.download_fileobj(bucket, pdf_key, tmp_file)
             tmp_file_path = tmp_file.name
+            st.write(f"Downloaded file size: {os.path.getsize(tmp_file_path)} bytes")
 
-        with open(tmp_file_path, "rb") as f:
+            # Open the PDF and extract text
+            doc = fitz.open(tmp_file_path)
+            full_text = ""
+            for page in doc:
+                full_text += page.get_text()
+
+            # Use regex to find the name under "Insured"
+            match = re.search(r"Insured\s*:\s*(.+)", full_text, re.IGNORECASE)
+            if match:
+                insured_name = match.group(1).strip()
+                st.success(f"Insured Name: {insured_name}")
+            else:
+                st.warning("Could not find the 'Insured' name in the PDF.")
+
+
+
+
+        '''with open(tmp_file_path, "rb") as f:
             base64_pdf = base64.b64encode(f.read()).decode("utf-8")
 
         st.markdown(
             f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" '
             'type="application/pdf"></iframe>',
             unsafe_allow_html=True
-        )
+        )'''
 
     except Exception as e:
         st.error(f"Could not retrieve PDF: {e}")
