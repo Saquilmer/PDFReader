@@ -3,5 +3,3 @@ pandas
 boto3
 python-dotenv
 PyMuPDF
-fitz
-re
