@@ -38,6 +38,9 @@ if uploaded_file is not None:
 st.title("View PDF from S3")
 '''pdf_key = st.text_input("Enter S3 key of the PDF (e.g., `invoices/INV001.pdf`):")'''
 
+user_input = st.text_input("Enter text to search in PDF")
+
+
 
 s3 = boto3.client(
       "s3",
@@ -71,12 +74,21 @@ if pdf_key:
             full_text = ""
             for page in doc:
                 full_text += page.get_text()
+            
+            lines = full_text.splitlines()
+            insured_name = None
 
-            # Use regex to find the name under "Insured"
-            match = re.search(r"Insured\s*:\s*(.+)", full_text, re.IGNORECASE)
-            if match:
-                insured_name = match.group(1).strip()
-                st.success(f"Insured Name: {insured_name}")
+            for i, line in enumerate(lines):
+                if "insurer a" in line.lower():
+            # Look ahead for the next non-empty line
+                    st.write(f"Found 'insurer' at line {i}: {line}")
+                    match = re.search(re.escape(user_input) + r"insurer a[:\s]*(.+)", line, re.IGNORECASE)
+                    if match :
+                        insurer_a = match.group(1).strip()
+                    break
+
+            if insured_name:
+                st.success(f"Insurer A Name: {insurer_a}")
             else:
                 st.warning("Could not find the 'Insured' name in the PDF.")
 
