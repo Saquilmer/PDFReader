@@ -90,7 +90,7 @@ if pdf_key:
             if insured_name:
                 st.success(f"Insurer A Name: {insurer_a}")
             else:
-                st.warning("Could not find the 'Insured' name in the PDF.")
+                st.warning("Could not find the {insurer_a} name in the PDF.")
 
 
 
