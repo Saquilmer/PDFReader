@@ -38,7 +38,7 @@ if uploaded_file is not None:
 st.title("View PDF from S3")
 '''pdf_key = st.text_input("Enter S3 key of the PDF (e.g., `invoices/INV001.pdf`):")'''
 
-user_input = st.text_input("Enter text to search in PDF")
+
 
 
 
@@ -57,8 +57,7 @@ if "Contents" in response:
             pdf_key = obj["Key"]
             break
 
-st.title("View Frist PDF")
-
+user_input = st.text_input("Enter text to search in PDF")
 
 if pdf_key:
     st.write(f"Loading PDF: `{pdf_key}`")
@@ -79,16 +78,16 @@ if pdf_key:
             insured_name = None
 
             for i, line in enumerate(lines):
-                if "insurer a" in line.lower():
+                if user_input.lower() in line.lower():
             # Look ahead for the next non-empty line
-                    st.write(f"Found 'insurer' at line {i}: {line}")
+                    st.write(f"Found {user_input} at line {i}: {line}")
                     match = re.search(re.escape(user_input) + r"insurer a[:\s]*(.+)", line, re.IGNORECASE)
                     if match :
                         insurer_a = match.group(1).strip()
                     break
 
-            if insured_name:
-                st.success(f"Insurer A Name: {insurer_a}")
+            if insurer_a:
+                st.success(f"Found: {insurer_a}")
             else:
                 st.warning("Could not find the {insurer_a} name in the PDF.")
 
